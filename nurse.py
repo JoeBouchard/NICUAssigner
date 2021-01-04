@@ -14,3 +14,6 @@ class Nurse:
 
     def addAttr(self, attr):
         self.attrs.append(attrs)
+
+    def __lt__(self, other):
+        return self.getName() < other.getName()
