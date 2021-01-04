@@ -5,6 +5,8 @@ from patient import *
 
 testing = True
 
+print("Running!")
+
 class MainScreen:
     
     def __init__(self, name):
@@ -22,12 +24,18 @@ class MainScreen:
         self.nurseAttrsDisplay = []
         self.nurseCheckVars = []
         self.nurseAttrsFrame = Frame(self.nurseFrame)
+        self.addNurseBtn = Button(self.nurseFrame, text="Add Nurse")
+        self.editNurseBtn = Button(self.nurseFrame, text="Edit Nurse")
+        self.removeNurseBtn = Button(self.nurseFrame, text="Remove Nurse")
 
         self.patientFrame = Frame(self.tk)
         self.patientDisplay = Listbox(self.patientFrame)
         self.patientAttrsDisplay = []
         self.patientCheckVars = []
         self.patientAttrsFrame = Frame(self.patientFrame)
+        self.addPatientBtn = Button(self.patientFrame, text="Add Patient")
+        self.editPatientBtn = Button(self.patientFrame, text="Edit Patient")
+        self.removePatientBtn = Button(self.patientFrame, text="Remove Patient")
         
         self.pack()
 
@@ -58,7 +66,7 @@ class MainScreen:
                     break
             if not found:
                 v=IntVar() 
-                c=Checkbutton(self.nurseAttrsFrame, text=a, variable=v)
+                c=Checkbutton(self.nurseAttrsFrame, text=a, variable=v, state='disabled')
                 self.nurseCheckVars.append(v)
                 c.pack(side='top')
                 self.nurseAttrsDisplay.append(c)
@@ -108,7 +116,7 @@ class MainScreen:
                     break
             if not found:
                 v = IntVar()
-                c=Checkbutton(self.patientAttrsFrame, text=a, variable=v)
+                c=Checkbutton(self.patientAttrsFrame, text=a, variable=v, state='disabled')
                 self.patientCheckVars.append(v)
                 c.pack(side='top')
                 self.patientAttrsDisplay.append(c)
@@ -134,6 +142,9 @@ class MainScreen:
     def pack(self):
         self.nurseLabel = Label(self.nurseFrame, text="Nurses:")
         self.nurseLabel.pack(side='top')
+        self.removeNurseBtn.pack(side='bottom', fill='x')
+        self.editNurseBtn.pack(side='bottom', fill='x')
+        self.addNurseBtn.pack(side='bottom', fill='x')
         self.nurseDisplay.pack(side='left')
         self.nurseAttrsFrame.pack(side='right')
         self.nurseFrame.pack(side='left')
@@ -141,6 +152,9 @@ class MainScreen:
 
         self.patientLabel = Label(self.patientFrame, text="Patients:")
         self.patientLabel.pack(side='top')
+        self.removePatientBtn.pack(side='bottom', fill='x')
+        self.editPatientBtn.pack(side='bottom', fill='x')
+        self.addPatientBtn.pack(side='bottom', fill='x')
         self.patientDisplay.pack(side='right')
         self.patientAttrsFrame.pack(side='left')
         self.patientFrame.pack(side='right')
@@ -156,3 +170,4 @@ if testing:
     
     m.addPatient("Claude", ['d', 'e', 'f'])
 
+mainloop()
