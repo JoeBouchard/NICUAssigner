@@ -68,8 +68,9 @@ class MainScreen:
     def __addNurseBtn(self):
         """Button event to add a nurse"""
         name= simpledialog.askstring("Nurse name", "What is the nurse's name?")
-        self.addNurse(name, [])
-        self.__editNurseBtn()
+        if name:
+            self.addNurse(name, [])
+            self.__editNurseBtn()
 
     def __editNurseBtn(self):
         print("TODO")
