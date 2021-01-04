@@ -1,4 +1,7 @@
 from tkinter import *
+from tkinter import messagebox
+from tkinter import simpledialog
+from tkinter import filedialog
 from nurse import *
 from attributes import *
 from patient import *
@@ -10,6 +13,7 @@ class MainScreen:
     def __init__(self, name):
         ##Create a base window everything is built on
         self.tk = Tk(screenName=name, baseName=name)
+        self.tk.title(name)
 
         ##Create variables to store lists of nurses and patients
         self.nurses = []
@@ -60,6 +64,15 @@ class MainScreen:
                 self.nurseAttrs.append(a)
 
         self.updateNurses()
+
+    def __addNurseBtn(self):
+        """Button event to add a nurse"""
+        name= simpledialog.askstring("Nurse name", "What is the nurse's name?")
+        self.addNurse(name, [])
+        self.__editNurseBtn()
+
+    def __editNurseBtn(self):
+        print("TODO")
 
     def updateNurses(self):
         """refreshes the nurse display"""
@@ -189,37 +202,49 @@ class MainScreen:
         ##Create text saying "Nurses:" to label the nurses section of the widget
         self.nurseLabel = Label(self.nurseFrame, text="Nurses:")
         self.nurseLabel.pack(side='top')
+        
         ##Add nurse buttons to bottom of the display in reverse order
         self.removeNurseBtn.pack(side='bottom', fill='x')
         self.editNurseBtn.pack(side='bottom', fill='x')
         self.addNurseBtn.pack(side='bottom', fill='x')
+        self.addNurseBtn.config(command=self.__addNurseBtn)
+        
         ##Add the nurse list to the display on the left
         self.nurseDisplay.pack(side='left')
+        
         ##Add frame with checkbuttons on the right
         self.nurseAttrsFrame.pack(side='right')
+        
         ##Add frame with all nurse data on the left of the main widget
         self.nurseFrame.pack(side='left')
+        
         ##Bind the __nurseSelect function to trigger when a nurse is selected
         self.nurseDisplay.bind('<<ListboxSelect>>', self.__nurseSelect)
+
 
         ##Create text saying "Patients:" to label the patients section of the widget
         self.patientLabel = Label(self.patientFrame, text="Patients:")
         self.patientLabel.pack(side='top')
+        
         ##Add patient buttons in reverse order
         self.removePatientBtn.pack(side='bottom', fill='x')
         self.editPatientBtn.pack(side='bottom', fill='x')
         self.addPatientBtn.pack(side='bottom', fill='x')
+        
         ##Add the pateint list to the right of the frame
         self.patientDisplay.pack(side='right')
+        
         ##Add the button frame to the left of the frame
         self.patientAttrsFrame.pack(side='left')
+
         ##Add the patient frame on the right of the main screen
         self.patientFrame.pack(side='right')
+
         ##Bind the __patientSelect function to trigger when a patient is selected
         self.patientDisplay.bind('<<ListboxSelect>>', self.__patientSelect)
     
         
-m=MainScreen("Hello")
+m=MainScreen("NICUAssigner")
 
 if testing:
     m.addNurse("Frida", ['a', 'b', 'c'])
