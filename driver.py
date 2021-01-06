@@ -319,4 +319,4 @@ if testing:
     
     m.addPatient("Claude", ['d', 'e', 'f'])
 
-#mainloop()
+mainloop()
