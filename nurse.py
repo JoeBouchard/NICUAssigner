@@ -13,7 +13,15 @@ class Nurse:
         return self.attrs
 
     def addAttr(self, attr):
-        self.attrs.append(attrs)
+        self.attrs.append(attr)
+
+    def removeAttr(self, attr):
+        self.attrs.remove(attr)
 
     def __lt__(self, other):
         return self.getName() < other.getName()
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.getName() == other.getName()
+        return self.getName() == other
