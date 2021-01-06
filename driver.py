@@ -65,26 +65,86 @@ class MainScreen:
 
         self.updateNurses()
 
+    def removeNurse(self, name):
+        self.nurses.remove(self.getNurse(name))
+        self.updateNurses()
+
     def __addNurseBtn(self):
         """Button event to add a nurse"""
         name= simpledialog.askstring("Nurse name", "What is the nurse's name?")
         if name:
             self.addNurse(name, [])
-            self.__editNurseBtn()
+            self.nurseDisplay.focus()
+            self.nurseDisplay.selection_clear(0, END)
+            self.nurseDisplay.selection_set(self.nurses.index(self.getNurse(name)))
+            self.nurseDisplay.activate(self.nurses.index(self.getNurse(name)))
+            print(self.nurses.index(self.getNurse(name)))
+            print(self.nurseDisplay.curselection())
+            self.__nurseSelect(0)
+            self.__editNurseBtn(fromAdd=True)
 
-    def __editNurseBtn(self):
-        print("TODO")
+    def __editNurseBtn(self, fromAdd=False):
+
+        
+        toggle = self.editNurseBtn.cget('text')
+
+        print(toggle)
+        if toggle == 'Edit Nurse':
+            self.editNurseBtn.config(text='Finished Editing')
+            for b in self.nurseAttrsDisplay:
+                b.config(state='active')
+
+        elif not fromAdd:
+            self.editNurseBtn.config(text='Edit Nurse')
+            for b in self.nurseAttrsDisplay:
+                b.config(state='disabled')
+
+    def __removeNurseBtn(self):
+        
+        w = self.nurseDisplay
+        index = w.curselection()
+
+        name = w.get(index)
+        self.removeNurse(name)
+
+    def __nurseCheckBtn(self):
+        
+        ##Get selected nurse
+        w = self.nurseDisplay
+        index = w.curselection()
+
+        name = w.get(index)
+        nurse = self.getNurse(name)
+        
+        selAttr = []
+        for b in self.nurseAttrsDisplay:
+            bVar = b.cget('var')
+            isSelected = self.tk.getint(self.tk.getvar(bVar))
+
+            if isSelected != 0:
+                if b.cget('text') not in nurse.getAttrs():
+                    nurse.addAttr(b.cget('text'))
+
+            if isSelected == 0:
+                if b.cget('text') in nurse.getAttrs():
+                    nurse.removeAttr(b.cget('text'))
+        
 
     def updateNurses(self):
         """refreshes the nurse display"""
-        ##Delete and repopulate nurse name display
-        self.nurseDisplay.delete(0, END)
+        ##Add new nurses to the display
         self.nurses.sort()
         for nNum in range(0, len(self.nurses)):
-            self.nurseDisplay.insert(nNum, self.nurses[nNum].getName())
+            if self.nurses[nNum].getName() not in self.nurseDisplay.get(0, END):
+                self.nurseDisplay.insert(nNum, self.nurses[nNum].getName())
+
+        for nNum in range(0, self.nurseDisplay.size()):
+            if self.nurseDisplay.get(nNum) not in self.nurses:
+                self.nurseDisplay.delete(nNum)
 
         ##Iterate through all possible nurse attributes 
-        for a in self.nurseAttrs:
+        for nA in range(0, len(self.nurseAttrs)):
+            a = self.nurseAttrs[nA]
             found = False
             ##Find if the attribute already has a button
             for b in self.nurseAttrsDisplay:
@@ -95,10 +155,13 @@ class MainScreen:
             if not found:
                 v=IntVar() 
                 c=Checkbutton(self.nurseAttrsFrame, text=a, variable=v, state='disabled')
+                
+                c.config(command=self.__nurseCheckBtn)
                 self.nurseCheckVars.append(v)
+                
                 c.pack(side='top')
                 self.nurseAttrsDisplay.append(c)
-                print(a)
+                print(a, self.nurseAttrs[nA])
 
     def __nurseSelect(self, event):
         """Toggle correct attributes when a nurse is selected"""
@@ -209,6 +272,8 @@ class MainScreen:
         self.editNurseBtn.pack(side='bottom', fill='x')
         self.addNurseBtn.pack(side='bottom', fill='x')
         self.addNurseBtn.config(command=self.__addNurseBtn)
+        self.editNurseBtn.config(command=self.__editNurseBtn)
+        self.removeNurseBtn.config(command=self.__removeNurseBtn)
         
         ##Add the nurse list to the display on the left
         self.nurseDisplay.pack(side='left')
@@ -254,4 +319,4 @@ if testing:
     
     m.addPatient("Claude", ['d', 'e', 'f'])
 
-mainloop()
+#mainloop()
