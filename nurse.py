@@ -5,6 +5,7 @@ class Nurse:
         
         self.name = name
         self.attrs = attrs
+        self.patients = []
 
     def getName(self):
         return self.name
@@ -17,6 +18,15 @@ class Nurse:
 
     def removeAttr(self, attr):
         self.attrs.remove(attr)
+
+    def assignPatient(self, patient):
+        self.patients.append(patient)
+
+    def removePatient(self, patient):
+        self.patients.remove(patient)
+
+    def getPatients(self):
+        return self.patients
 
     def __lt__(self, other):
         return self.getName() < other.getName()
