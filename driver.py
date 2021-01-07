@@ -230,7 +230,7 @@ class MainScreen:
             ##Create a checkbutton if one doesn't exist
             if not found:
                 v = IntVar()
-                c=Checkbutton(self.patientAttrsFrame, text=a, variable=v, state='disabled')
+                c=Checkbutton(self.patientAttrsFrame, text=a, variable=v, state='disabled', command=self.__patientCheckBtn)
                 self.patientCheckVars.append(v)
                 c.pack(side='top')
                 self.patientAttrsDisplay.append(c)
@@ -260,6 +260,44 @@ class MainScreen:
                     if b.cget('text') == a:
                         b.select()
                         print(a)
+
+    def __patientCheckBtn(self):
+        
+        ##Get selected patient
+        w = self.patientDisplay
+        index = w.curselection()
+
+        name = w.get(index)
+        patient = self.getPatient(name)
+        
+        selAttr = []
+        for b in self.patientAttrsDisplay:
+            bVar = b.cget('var')
+            isSelected = self.tk.getint(self.tk.getvar(bVar))
+
+            if isSelected != 0:
+                if b.cget('text') not in patient.getAttrs():
+                    patient.addAttr(b.cget('text'))
+
+            if isSelected == 0:
+                if b.cget('text') in patient.getAttrs():
+                    patient.removeAttr(b.cget('text'))
+
+    def __editPatientBtn(self, fromAdd=False):
+
+        
+        toggle = self.editPatientBtn.cget('text')
+
+        print(toggle)
+        if toggle == 'Edit Patient':
+            self.editPatientBtn.config(text='Finished Editing')
+            for b in self.patientAttrsDisplay:
+                b.config(state='active')
+
+        elif not fromAdd:
+            self.editPatientBtn.config(text='Edit Patient')
+            for b in self.patientAttrsDisplay:
+                b.config(state='disabled')
 
     def pack(self):
         """Puts all created objects on the main screen"""
@@ -296,8 +334,9 @@ class MainScreen:
         self.removePatientBtn.pack(side='bottom', fill='x')
         self.editPatientBtn.pack(side='bottom', fill='x')
         self.addPatientBtn.pack(side='bottom', fill='x')
+        self.editPatientBtn.config(command=self.__editPatientBtn)
         
-        ##Add the pateint list to the right of the frame
+        ##Add the patient list to the right of the frame
         self.patientDisplay.pack(side='right')
         
         ##Add the button frame to the left of the frame
@@ -318,5 +357,6 @@ if testing:
     m.addNurse("Fred", ['b', 'c'])
     
     m.addPatient("Claude", ['d', 'e', 'f'])
+    m.addPatient("Carl", ['d', 'f'])
 
 mainloop()
