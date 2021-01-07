@@ -13,7 +13,10 @@ class Patient:
         return self.attrs
 
     def addAttr(self, attr):
-        self.attrs.append(attrs)
+        self.attrs.append(attr)
+
+    def removeAttr(self, attr):
+        self.attrs.remove(attr)
 
     def __lt__(self, other):
         return self.getName() < other.getName()
