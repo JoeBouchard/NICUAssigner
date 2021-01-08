@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter import simpledialog
 from tkinter import filedialog
+from tkinter import scrolledtext
 from nurse import *
 from attributes import *
 from patient import *
@@ -26,7 +27,7 @@ class MainScreen:
 
         ##Create display for nurse names and attributes
         self.nurseFrame = Frame(self.tk)
-        self.nurseDisplay = Listbox(self.nurseFrame)
+        self.nurseDisplay = Listbox(self.nurseFrame, width=30)
         self.nurseAttrsDisplay = []
         self.nurseCheckVars = []
         self.nurseAttrsFrame = Frame(self.nurseFrame)
@@ -37,7 +38,7 @@ class MainScreen:
 
         ##Create display for patient names and attributes
         self.patientFrame = Frame(self.tk)
-        self.patientDisplay = Listbox(self.patientFrame)
+        self.patientDisplay = Listbox(self.patientFrame, width=30)
         self.patientAttrsDisplay = []
         self.patientCheckVars = []
         self.patientAttrsFrame = Frame(self.patientFrame)
@@ -45,6 +46,16 @@ class MainScreen:
         self.addPatientBtn = Button(self.patientFrame, text="Add Patient")
         self.editPatientBtn = Button(self.patientFrame, text="Edit Patient")
         self.removePatientBtn = Button(self.patientFrame, text="Remove Patient")
+
+        ##Create frame for information display
+        self.dataFrame = Frame(self.tk)
+        self.infoText = scrolledtext.ScrolledText(self.dataFrame)
+        self.infoText.insert(END, "This box will be filled with information about nurses, patients, and attributes when selected")
+        self.infoText.config(state='disabled')
+        ##Create buttons to modify attributes
+        self.addAttrBtn = Button(self.dataFrame, text="Add Attribute")
+        self.editAttrBtn = Button(self.dataFrame, text="Edit Attribute")
+        self.removeAttrBtn = Button(self.dataFrame, text="Remove Attribute")
 
         ##Pack all to make it visible
         self.pack()
@@ -159,7 +170,7 @@ class MainScreen:
                 c.config(command=self.__nurseCheckBtn)
                 self.nurseCheckVars.append(v)
                 
-                c.pack(side='top')
+                c.grid(row=nA, column=0, sticky='w')
                 self.nurseAttrsDisplay.append(c)
                 print(a, self.nurseAttrs[nA])
 
@@ -187,6 +198,14 @@ class MainScreen:
                     if b.cget('text') == a:
                         b.select()
 
+        ##TODO: Update info text
+        if len(index) > 0:
+            self.infoText.config(state='normal')
+            self.infoText.delete(1.0, END)
+            self.infoText.insert(1.0, "TODO: Populate with info about "+name)
+            self.infoText.config(state='disabled')
+
+                            
     def getPatient(self, name):
         """Returns a patient object given a name"""
         for n in self.patients:
@@ -237,7 +256,7 @@ class MainScreen:
                 v = IntVar()
                 c=Checkbutton(self.patientAttrsFrame, text=a, variable=v, state='disabled', command=self.__patientCheckBtn)
                 self.patientCheckVars.append(v)
-                c.pack(side='top')
+                c.grid(row=self.patientAttrs.index(a), column=0, sticky='w')
                 self.patientAttrsDisplay.append(c)
                 print(a)
 
@@ -266,6 +285,13 @@ class MainScreen:
                         b.select()
                         print(a)
 
+        ##TODO: Update info text
+        if len(index) > 0:
+            self.infoText.config(state='normal')
+            self.infoText.delete(1.0, END)
+            self.infoText.insert(1.0, "TODO: Populate with info about "+name)
+            self.infoText.config(state='disabled')
+
     def __addPatientBtn(self):
         """Button event to add a patient"""
         name= simpledialog.askstring("Patient name", "What is the patient's name?")
@@ -279,28 +305,6 @@ class MainScreen:
             print(self.patientDisplay.curselection())
             self.__patientSelect(0)
             self.__editPatientBtn(fromAdd=True)
-
-    def __patientCheckBtn(self):
-        
-        ##Get selected patient
-        w = self.patientDisplay
-        index = w.curselection()
-
-        name = w.get(index)
-        patient = self.getPatient(name)
-        
-        selAttr = []
-        for b in self.patientAttrsDisplay:
-            bVar = b.cget('var')
-            isSelected = self.tk.getint(self.tk.getvar(bVar))
-
-            if isSelected != 0:
-                if b.cget('text') not in patient.getAttrs():
-                    patient.addAttr(b.cget('text'))
-
-            if isSelected == 0:
-                if b.cget('text') in patient.getAttrs():
-                    patient.removeAttr(b.cget('text'))
 
     def __editPatientBtn(self, fromAdd=False):
 
@@ -325,6 +329,30 @@ class MainScreen:
         name = w.get(index)
         self.removePatient(name)
 
+    def __patientCheckBtn(self):
+        
+        ##Get selected patient
+        w = self.patientDisplay
+        index = w.curselection()
+
+        name = w.get(index)
+        patient = self.getPatient(name)
+        
+        selAttr = []
+        for b in self.patientAttrsDisplay:
+            bVar = b.cget('var')
+            isSelected = self.tk.getint(self.tk.getvar(bVar))
+
+            if isSelected != 0:
+                if b.cget('text') not in patient.getAttrs():
+                    patient.addAttr(b.cget('text'))
+
+            if isSelected == 0:
+                if b.cget('text') in patient.getAttrs():
+                    patient.removeAttr(b.cget('text'))
+
+
+
     def pack(self):
         """Puts all created objects on the main screen"""
         ##Create text saying "Nurses:" to label the nurses section of the widget
@@ -332,21 +360,21 @@ class MainScreen:
         self.nurseLabel.pack(side='top')
         
         ##Add nurse buttons to bottom of the display in reverse order
-        self.removeNurseBtn.pack(side='bottom', fill='x')
-        self.editNurseBtn.pack(side='bottom', fill='x')
-        self.addNurseBtn.pack(side='bottom', fill='x')
+        self.removeNurseBtn.pack(side='bottom', fill='both')
+        self.editNurseBtn.pack(side='bottom', fill='both')
+        self.addNurseBtn.pack(side='bottom', fill='both')
         self.addNurseBtn.config(command=self.__addNurseBtn)
         self.editNurseBtn.config(command=self.__editNurseBtn)
         self.removeNurseBtn.config(command=self.__removeNurseBtn)
         
         ##Add the nurse list to the display on the left
-        self.nurseDisplay.pack(side='left')
+        self.nurseDisplay.pack(side='left', fill='both')
         
         ##Add frame with checkbuttons on the right
-        self.nurseAttrsFrame.pack(side='right')
+        self.nurseAttrsFrame.pack(side='right', fill='both')
         
         ##Add frame with all nurse data on the left of the main widget
-        self.nurseFrame.pack(side='left')
+        self.nurseFrame.pack(side='left', fill='y')
         
         ##Bind the __nurseSelect function to trigger when a nurse is selected
         self.nurseDisplay.bind('<<ListboxSelect>>', self.__nurseSelect)
@@ -357,34 +385,43 @@ class MainScreen:
         self.patientLabel.pack(side='top')
         
         ##Add patient buttons in reverse order
-        self.removePatientBtn.pack(side='bottom', fill='x')
-        self.editPatientBtn.pack(side='bottom', fill='x')
-        self.addPatientBtn.pack(side='bottom', fill='x')
+        self.removePatientBtn.pack(side='bottom', fill='both')
+        self.editPatientBtn.pack(side='bottom', fill='both')
+        self.addPatientBtn.pack(side='bottom', fill='both')
         self.addPatientBtn.config(command=self.__addPatientBtn)
         self.editPatientBtn.config(command=self.__editPatientBtn)
         self.removePatientBtn.config(command=self.__removePatientBtn)
         
         ##Add the patient list to the right of the frame
-        self.patientDisplay.pack(side='right')
+        self.patientDisplay.pack(side='right', fill='both')
         
         ##Add the button frame to the left of the frame
-        self.patientAttrsFrame.pack(side='left')
+        self.patientAttrsFrame.pack(side='left', fill='both')
 
         ##Add the patient frame on the right of the main screen
-        self.patientFrame.pack(side='right')
+        self.patientFrame.pack(side='right', fill='both')
 
         ##Bind the __patientSelect function to trigger when a patient is selected
         self.patientDisplay.bind('<<ListboxSelect>>', self.__patientSelect)
+
+        ##Add data frame to the center of the screen
+        self.dataFrame.pack(side='left', fill='both')
+
+        ##Assign buttons and text box to locations in the data frame
+        self.infoText.pack(side='top', fill='both')
+        self.removeAttrBtn.pack(side='bottom', fill='x')
+        self.editAttrBtn.pack(side='bottom', fill='x')
+        self.addAttrBtn.pack(side='bottom', fill='x')
     
         
 m=MainScreen("NICUAssigner")
 
 if testing:
-    m.addNurse("Frida", ['a', 'b', 'c'])
-    m.addNurse("Franz", ['a', 'c'])
-    m.addNurse("Fred", ['b', 'c'])
+    m.addNurse("Frida", ['obdormition', 'borborgymus', 'xerosis'])
+    m.addNurse("Franz", ['borborgymus', 'xerosis'])
+    m.addNurse("Fred", ['obdormition'])
     
-    m.addPatient("Claude", ['d', 'e', 'f'])
-    m.addPatient("Carl", ['d', 'f'])
+    m.addPatient("Claude", ['sphenopalatine ganglioneuralgia', 'morsicatio buccarum', 'lachrymation'])
+    m.addPatient("Carl", ['morsicatio buccarum', 'lachrymation'])
 
 mainloop()
