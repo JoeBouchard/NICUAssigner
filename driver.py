@@ -206,6 +206,11 @@ class MainScreen:
         ##Update the display
         self.updatePatients()
 
+    def removePatient(self, patient):
+        self.patients.remove(self.getPatient(patient))
+
+        self.updatePatients()
+
     def updatePatients(self):
         """Updates display of patients"""
 
@@ -261,6 +266,20 @@ class MainScreen:
                         b.select()
                         print(a)
 
+    def __addPatientBtn(self):
+        """Button event to add a patient"""
+        name= simpledialog.askstring("Patient name", "What is the patient's name?")
+        if name:
+            self.addPatient(name, [])
+            self.patientDisplay.focus()
+            self.patientDisplay.selection_clear(0, END)
+            self.patientDisplay.selection_set(self.patients.index(self.getPatient(name)))
+            self.patientDisplay.activate(self.patients.index(self.getPatient(name)))
+            print(self.patients.index(self.getPatient(name)))
+            print(self.patientDisplay.curselection())
+            self.__patientSelect(0)
+            self.__editPatientBtn(fromAdd=True)
+
     def __patientCheckBtn(self):
         
         ##Get selected patient
@@ -285,7 +304,6 @@ class MainScreen:
 
     def __editPatientBtn(self, fromAdd=False):
 
-        
         toggle = self.editPatientBtn.cget('text')
 
         print(toggle)
@@ -298,6 +316,14 @@ class MainScreen:
             self.editPatientBtn.config(text='Edit Patient')
             for b in self.patientAttrsDisplay:
                 b.config(state='disabled')
+
+    def __removePatientBtn(self):
+        
+        w = self.patientDisplay
+        index = w.curselection()
+
+        name = w.get(index)
+        self.removePatient(name)
 
     def pack(self):
         """Puts all created objects on the main screen"""
@@ -334,7 +360,9 @@ class MainScreen:
         self.removePatientBtn.pack(side='bottom', fill='x')
         self.editPatientBtn.pack(side='bottom', fill='x')
         self.addPatientBtn.pack(side='bottom', fill='x')
+        self.addPatientBtn.config(command=self.__addPatientBtn)
         self.editPatientBtn.config(command=self.__editPatientBtn)
+        self.removePatientBtn.config(command=self.__removePatientBtn)
         
         ##Add the patient list to the right of the frame
         self.patientDisplay.pack(side='right')
