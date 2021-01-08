@@ -55,7 +55,7 @@ class MainScreen:
 
         ##Create frame for information display
         self.dataFrame = Frame(self.tk)
-        self.infoText = scrolledtext.ScrolledText(self.dataFrame)
+        self.infoText = scrolledtext.ScrolledText(self.dataFrame, wrap="word", width=30)
         self.infoText.insert(END, "This box will be filled with information about nurses, patients, and attributes when selected")
         self.infoText.config(state='disabled')
         ##Create buttons to modify attributes
@@ -79,6 +79,7 @@ class MainScreen:
         for a in attrs:
             if a not in self.nurseAttrs:
                 self.nurseAttrs.append(a)
+                self.attrRelations[a] = []
 
         self.updateNurses()
 
@@ -115,6 +116,7 @@ class MainScreen:
             self.editNurseBtn.config(text='Edit Nurse')
             for b in self.nurseAttrsDisplay:
                 b.config(state='disabled')
+                self.__nurseSelect(0)
 
     def __removeNurseBtn(self):
         
@@ -208,7 +210,21 @@ class MainScreen:
         if len(index) > 0:
             self.infoText.config(state='normal')
             self.infoText.delete(1.0, END)
-            self.infoText.insert(1.0, "TODO: Populate with info about "+name)
+            toDisp = "Nurse "+name+":\n"
+            toDisp += "Is currently treating the patients:\n"
+            for i in nurse.getPatients():
+                toDisp += i.getName()
+                if nurse.getPatients().index(i) < len(nurse.getPatients())-1:
+                    toDisp+=', '
+            toDisp += "\nHas the attributes:\n"+', '.join(nurse.getAttrs())
+            toDisp += "\n\nCan treat patients with the attributes:\n"
+            canTreat = []
+            for i in nurse.getAttrs():
+                for j in self.attrRelations[i]:
+                    if j not in canTreat:
+                        canTreat.append(j)
+            toDisp += ', '.join(canTreat)
+            self.infoText.insert(1.0, toDisp)
             self.infoText.config(state='disabled')
 
                             
@@ -357,7 +373,71 @@ class MainScreen:
                 if b.cget('text') in patient.getAttrs():
                     patient.removeAttr(b.cget('text'))
 
+    def createNewAttr(self, np, name, related, window=0):
+        print(name, np, np==0, np==1)
+        if name != '':
+            if np == 0:
+                
+                if name not in self.nurseAttrs:
+                    self.nurseAttrs.append(name)
+                    self.attrRelations[name] = []
 
+                if related != '':
+                    relList = related.split(', ')
+                    for i in relList:
+                        if i not in self.patientAttrs:
+                            self.patientAttrs.append(i)
+                        if i not in self.attrRelations[name]:
+                            self.attrRelations[name].append(i)
+                
+            elif np == 1:
+                
+                if name not in self.patientAttrs:
+                    self.patientAttrs.append(name)
+
+                if related != '':
+                    relList = related.split(', ')
+                    for i in relList:
+                        if i not in self.nurseAttrs:
+                            self.nurseAttrs.append(name)
+                            self.attrRelations[i] = [name]
+                        if name not in self.attrRelations[i]:
+                            self.attrRelations[i].append(name)
+
+        self.updateNurses()
+        self.updatePatients()
+        if window != 0:
+            window.destroy()
+                    
+    def __addAttrBtn(self):
+        attrWindow = Tk()
+        attrWindow.title("New Attribute Entry")
+        q1 = Label(attrWindow, text="Please enter the attribute's name")
+        q1.pack(side='top')
+        attrName = Entry(attrWindow)
+        attrName.pack(side='top')
+
+        nursePatientLabel = Label(attrWindow, text="Is this a nurse attribute \nor a patient attribute?")
+        nursePatientLabel.pack(side='top')
+
+        radioFrame = Frame(attrWindow)
+        radioVar = IntVar()
+        nurseRadio = Radiobutton(radioFrame, text="Nurse", variable=radioVar, value=0)
+        patientRadio = Radiobutton(radioFrame, text="Patient", variable=radioVar, value=1)
+        nurseRadio.pack(side='left')
+        patientRadio.pack(side='right')
+        nurseRadio.select()
+        radioFrame.pack(side='top')
+
+        relativeLabel = Label(attrWindow, text="Is there a related attribute to \nassociate this attribute with?\nEnter in a comma separated list")
+        relativeLabel.pack(side='top')
+
+        assocAttrs = Entry(attrWindow)
+        assocAttrs.pack(side='top', fill='both')
+
+        confirmAdd = Button(attrWindow, text="Create Attribute", command=lambda: self.createNewAttr(
+            radioVar.get(), attrName.get(), assocAttrs.get(), attrWindow))
+        confirmAdd.pack(side='bottom', fill='both')            
 
     def pack(self):
         """Puts all created objects on the main screen"""
@@ -374,7 +454,7 @@ class MainScreen:
         self.removeNurseBtn.config(command=self.__removeNurseBtn)
         
         ##Add the nurse list to the display on the left
-        self.nurseDisplay.pack(side='left', fill='both')
+        self.nurseDisplay.pack(side='left', fill='both', expand=True)
         
         ##Add frame with checkbuttons on the right
         self.nurseAttrsFrame.pack(side='right', fill='both')
@@ -411,13 +491,14 @@ class MainScreen:
         self.patientDisplay.bind('<<ListboxSelect>>', self.__patientSelect)
 
         ##Add data frame to the center of the screen
-        self.dataFrame.pack(side='left', fill='both')
+        self.dataFrame.pack(side='left', fill='both', expand=True)
 
         ##Assign buttons and text box to locations in the data frame
-        self.infoText.pack(side='top', fill='both')
         self.removeAttrBtn.pack(side='bottom', fill='x')
         self.editAttrBtn.pack(side='bottom', fill='x')
         self.addAttrBtn.pack(side='bottom', fill='x')
+        self.infoText.pack(side='bottom', fill='both', expand=True)
+        self.addAttrBtn.config(command=self.__addAttrBtn)
     
         
 m=MainScreen("NICUAssigner")
