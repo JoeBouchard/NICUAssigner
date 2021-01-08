@@ -6,6 +6,7 @@ from tkinter import scrolledtext
 from nurse import *
 from attributes import *
 from patient import *
+import sys, os
 
 testing = True
 
@@ -15,6 +16,11 @@ class MainScreen:
         ##Create a base window everything is built on
         self.tk = Tk(screenName=name, baseName=name)
         self.tk.title(name)
+        if getattr(sys, 'frozen', False):
+            applicationPath = sys._MEIPASS
+        elif __file__:
+            applicationPath = os.path.dirname(__file__)
+        self.tk.iconbitmap(os.path.join(applicationPath, 'rafal.ico'))
 
         ##Create variables to store lists of nurses and patients
         self.nurses = []
