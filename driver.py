@@ -172,15 +172,19 @@ class MainScreen:
                     break
             ##Create a button if there isn't one
             if not found:
+                nextRow = 0
+                if len(self.nurseAttrsDisplay) != 0:
+                    nextRow = self.nurseAttrsDisplay[-1].grid_info()['row']+1
+                    
                 v=IntVar() 
                 c=Checkbutton(self.nurseAttrsFrame, text=a, variable=v, state='disabled')
                 
                 c.config(command=self.__nurseCheckBtn)
                 self.nurseCheckVars.append(v)
                 
-                c.grid(row=nA, column=0, sticky='w')
+                c.grid(row=nextRow, column=0, sticky='w')
                 self.nurseAttrsDisplay.append(c)
-                print(a, self.nurseAttrs[nA])
+                #print(a, self.nurseAttrs[nA])
 
     def __nurseSelect(self, event):
         """Toggle correct attributes when a nurse is selected"""
@@ -275,12 +279,15 @@ class MainScreen:
                 
             ##Create a checkbutton if one doesn't exist
             if not found:
+                nextRow = 0
+                if len(self.patientAttrsDisplay) != 0:
+                    nextRow = self.patientAttrsDisplay[-1].grid_info()['row']+1
+                    
                 v = IntVar()
                 c=Checkbutton(self.patientAttrsFrame, text=a, variable=v, state='disabled', command=self.__patientCheckBtn)
                 self.patientCheckVars.append(v)
-                c.grid(row=self.patientAttrs.index(a), column=0, sticky='w')
+                c.grid(row=nextRow, column=0, sticky='w')
                 self.patientAttrsDisplay.append(c)
-                print(a)
 
     def __patientSelect(self, event):
         """Define event when patient is selected"""
@@ -374,10 +381,9 @@ class MainScreen:
                     patient.removeAttr(b.cget('text'))
 
     def createNewAttr(self, np, name, related, window=0):
-        print(name, np, np==0, np==1)
+        lastBtnRow = 0
         if name != '':
             if np == 0:
-                
                 if name not in self.nurseAttrs:
                     self.nurseAttrs.append(name)
                     self.attrRelations[name] = []
@@ -391,7 +397,6 @@ class MainScreen:
                             self.attrRelations[name].append(i)
                 
             elif np == 1:
-                
                 if name not in self.patientAttrs:
                     self.patientAttrs.append(name)
 
@@ -440,6 +445,7 @@ class MainScreen:
         confirmAdd.pack(side='bottom', fill='both')
 
     def __editAttrBtn(self):
+        """This is a hefty function that could use more comments"""
         attrWindow = Tk()
         #attrWindow.attributes('-topmost', True)
         attrWindow.title("Edit Attribute")
@@ -566,8 +572,44 @@ class MainScreen:
         toRemove = OptionMenu(attrWindow, selected, *allAttrs)
         toRemove.pack(side="top", fill='x')
 
-        
+        def removeAttr():
+            attr = selected.get()
+            if '(Nurse)' in attr:
+                attr = attr.replace(' (Nurse)', '')
+                self.nurseAttrs.remove(attr)
+                del self.attrRelations[attr]
+                for n in self.nurses:
+                    if attr in n.getAttrs():
+                        n.removeAttr(attr)
+                for b in self.nurseAttrsDisplay:
+                    if b.cget('text') == attr:
+                        b.destroy()
+                        self.nurseAttrsDisplay.remove(b)
+                        break
+                
+                
+            else:
+                attr = attr.replace(' (Patient)', '')
+                self.patientAttrs.remove(attr)
+                for key in self.attrRelations.keys():
+                    if attr in self.attrRelations[key]:
+                        self.attrRelations.remove(key)
+                        
+                for p in self.patients:
+                    if attr in p.getAttrs():
+                        p.removeAttr(attr)
 
+                for b in self.patientAttrsDisplay:
+                    if b.cget('text') == attr:
+                        b.destroy()
+                        self.patientAttrsDisplay.remove(b)
+                        break
+
+        removeBtn = Button(attrWindow, text="Remove selected attribute", command=removeAttr)
+        removeBtn.pack(side="top", fill="both")
+
+            
+            
     def pack(self):
         """Puts all created objects on the main screen"""
         ##Create text saying "Nurses:" to label the nurses section of the widget
