@@ -505,14 +505,22 @@ class MainScreen:
                 attrName = event.replace(' (Patient)', '')
                 for b in nurseBtns:
                     b.grid(row=nurseBtns.index(b), column=0, sticky="W")
-                    if attrName in b.cget('text'):
+                    if attrName in self.attrRelations[b.cget('text')]:
                         b.select()
+                    else:
+                        b.deselect()
                 for b in patientBtns:
                     b.grid_remove()
 
             else:
+                attrName = event.replace(' (Nurse)', '')
                 for b in patientBtns:
                     b.grid(row=patientBtns.index(b), column=0, sticky="W")
+                    
+                    if b.cget('text') in self.attrRelations[attrName]:
+                        b.select()
+                    else:
+                        b.deselect()
                 for b in nurseBtns:
                     b.grid_remove()
             
@@ -538,7 +546,7 @@ class MainScreen:
             self.__patientSelect(0)
                 
         confirmBtn = Button(attrWindow, text="Confirm changes", command=confirm)
-        confirmBtn.pack(side="bottom")
+        confirmBtn.pack(side="bottom", fill='x')
         
 
     def __removeAttrBtn(self):
