@@ -574,36 +574,39 @@ class MainScreen:
 
         def removeAttr():
             attr = selected.get()
-            if '(Nurse)' in attr:
-                attr = attr.replace(' (Nurse)', '')
-                self.nurseAttrs.remove(attr)
-                del self.attrRelations[attr]
-                for n in self.nurses:
-                    if attr in n.getAttrs():
-                        n.removeAttr(attr)
-                for b in self.nurseAttrsDisplay:
-                    if b.cget('text') == attr:
-                        b.destroy()
-                        self.nurseAttrsDisplay.remove(b)
-                        break
-                
-                
-            else:
-                attr = attr.replace(' (Patient)', '')
-                self.patientAttrs.remove(attr)
-                for key in self.attrRelations.keys():
-                    if attr in self.attrRelations[key]:
-                        self.attrRelations.remove(key)
-                        
-                for p in self.patients:
-                    if attr in p.getAttrs():
-                        p.removeAttr(attr)
+            yn = messagebox.askquestion("Confirm?", master=attrWindow, message="Confirm deletion of "+attr+"?\n(This cannot be undone)")
+            if yn == 'yes':
+                if '(Nurse)' in attr:
+                    attr = attr.replace(' (Nurse)', '')
+                    self.nurseAttrs.remove(attr)
+                    del self.attrRelations[attr]
+                    for n in self.nurses:
+                        if attr in n.getAttrs():
+                            n.removeAttr(attr)
+                    for b in self.nurseAttrsDisplay:
+                        if b.cget('text') == attr:
+                            b.destroy()
+                            self.nurseAttrsDisplay.remove(b)
+                            break
+                    
+                    
+                else:
+                    attr = attr.replace(' (Patient)', '')
+                    self.patientAttrs.remove(attr)
+                    for key in self.attrRelations.keys():
+                        if attr in self.attrRelations[key]:
+                            self.attrRelations.remove(key)
+                            
+                    for p in self.patients:
+                        if attr in p.getAttrs():
+                            p.removeAttr(attr)
 
-                for b in self.patientAttrsDisplay:
-                    if b.cget('text') == attr:
-                        b.destroy()
-                        self.patientAttrsDisplay.remove(b)
-                        break
+                    for b in self.patientAttrsDisplay:
+                        if b.cget('text') == attr:
+                            b.destroy()
+                            self.patientAttrsDisplay.remove(b)
+                            break
+                attrWindow.destroy()
 
         removeBtn = Button(attrWindow, text="Remove selected attribute", command=removeAttr)
         removeBtn.pack(side="top", fill="both")
