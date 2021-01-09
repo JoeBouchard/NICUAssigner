@@ -437,7 +437,128 @@ class MainScreen:
 
         confirmAdd = Button(attrWindow, text="Create Attribute", command=lambda: self.createNewAttr(
             radioVar.get(), attrName.get(), assocAttrs.get(), attrWindow))
-        confirmAdd.pack(side='bottom', fill='both')            
+        confirmAdd.pack(side='bottom', fill='both')
+
+    def __editAttrBtn(self):
+        attrWindow = Tk()
+        #attrWindow.attributes('-topmost', True)
+        attrWindow.title("Edit Attribute")
+        q1 = Label(attrWindow, text="Select Attribute to Edit")
+        q1.pack(side='top', fill='both')
+
+        allAttrs = []
+        btnFrame = Frame(attrWindow)
+        nurseVars = []
+        patientVars = []
+
+        def checkCommand():
+            n = selected.get()
+            if 'Patient' in n:
+                name = n.replace(' (Patient)', '')
+                for bNum in range(0, len(nurseBtns)):
+                    b = nurseBtns[bNum]
+                    isSelected = nurseVars[bNum].get()
+                        
+                    if isSelected == 1:
+                        nurseAttrName = b.cget('text')
+                        if name not in self.attrRelations[nurseAttrName]:
+                            self.attrRelations[nurseAttrName].append(name)
+                    else:
+                        nurseAttrName = b.cget('text')
+                        if name in self.attrRelations[nurseAttrName]:
+                            self.attrRelations[nurseAttrName].remove(name)
+
+            else:
+                name = n.replace(' (Nurse)', '')
+                for bNum in range(0, len(patientBtns)):
+                    b = patientBtns[bNum]
+                    isSelected = patientVars[bNum].get()
+                        
+                    if isSelected == 1:
+                        patientAttrName = b.cget('text')
+                        if patientAttrName not in self.attrRelations[name]:
+                            self.attrRelations[name].append(patientAttrName)
+                    else:
+                        patientAttrName = b.cget('text')
+                        if patientAttrName in self.attrRelations[name]:
+                            self.attrRelations[name].remove(patientAttrName) 
+
+        nurseBtns = []
+        for a in self.nurseAttrs:
+            allAttrs.append(a+" (Nurse)")
+            i = IntVar(btnFrame)
+            i.initialize(0)
+            nurseVars.append(i)
+            nurseBtns.append(Checkbutton(btnFrame, text=a, variable=nurseVars[-1], command=checkCommand))
+            
+            
+        patientBtns = []
+        for a in self.patientAttrs:
+            allAttrs.append(a+" (Patient)")
+            i = IntVar(btnFrame)
+            i.initialize(0)
+            patientBtns.append(Checkbutton(btnFrame, text=a, variable=i, command=checkCommand))                
+            patientVars.append(i)
+
+        def valSelect(event):
+            if 'Patient' in event:
+                attrName = event.replace(' (Patient)', '')
+                for b in nurseBtns:
+                    b.grid(row=nurseBtns.index(b), column=0, sticky="W")
+                    if attrName in b.cget('text'):
+                        b.select()
+                for b in patientBtns:
+                    b.grid_remove()
+
+            else:
+                for b in patientBtns:
+                    b.grid(row=patientBtns.index(b), column=0, sticky="W")
+                for b in nurseBtns:
+                    b.grid_remove()
+            
+        selected = StringVar(attrWindow, value=allAttrs[0])
+        toEdit = OptionMenu(attrWindow, selected, *allAttrs, command=valSelect)
+        toEdit.pack(side="top", fill='x')
+
+        descLabel = Label(attrWindow, text="This attribute is associated with the following attributes")
+        descLabel.pack(side='top')
+        btnFrame.pack(side="top")
+
+        def confirm():
+            yn = messagebox.askquestion(master=attrWindow, title="Confirm changes?", message="Confirm attribute changes?")
+            print(yn)
+            if yn == "yes":
+                attrWindow.destroy()
+            else:
+                attrWindow.focus()
+
+            self.updateNurses()
+            self.updatePatients()
+            self.__nurseSelect(0)
+            self.__patientSelect(0)
+                
+        confirmBtn = Button(attrWindow, text="Confirm changes", command=confirm)
+        confirmBtn.pack(side="bottom")
+        
+
+    def __removeAttrBtn(self):
+        attrWindow = Tk()
+        attrWindow.title("Remove Attribute")
+        q1 = Label(attrWindow, text="Select Attribute to Remove")
+        q1.pack(side='top', fill='both')
+
+        allAttrs = []
+        for a in self.nurseAttrs:
+            allAttrs.append(a+" (Nurse)")
+
+        for a in self.patientAttrs:
+            allAttrs.append(a+" (Patient)")
+
+        selected = StringVar(attrWindow, value=allAttrs[0])
+        toRemove = OptionMenu(attrWindow, selected, *allAttrs)
+        toRemove.pack(side="top", fill='x')
+
+        
 
     def pack(self):
         """Puts all created objects on the main screen"""
@@ -499,6 +620,8 @@ class MainScreen:
         self.addAttrBtn.pack(side='bottom', fill='x')
         self.infoText.pack(side='bottom', fill='both', expand=True)
         self.addAttrBtn.config(command=self.__addAttrBtn)
+        self.editAttrBtn.config(command=self.__editAttrBtn)
+        self.removeAttrBtn.config(command=self.__removeAttrBtn)
     
         
 m=MainScreen("NICUAssigner")
