@@ -63,6 +63,9 @@ class MainScreen:
         self.editAttrBtn = Button(self.dataFrame, text="Edit Attribute")
         self.removeAttrBtn = Button(self.dataFrame, text="Remove Attribute")
 
+        ##Create button to assign nurses to patients
+        self.goButton = Button(self.tk, text="Assign Nurses to Patients")
+
         ##Pack all to make it visible
         self.pack()
 
@@ -611,6 +614,9 @@ class MainScreen:
         removeBtn = Button(attrWindow, text="Remove selected attribute", command=removeAttr)
         removeBtn.pack(side="top", fill="both")
 
+    def assignNursesToPatients(self):
+        """Meat of the code. Assigns patients to nurses"""
+        print("TODO")
             
             
     def pack(self):
@@ -665,7 +671,7 @@ class MainScreen:
         self.patientDisplay.bind('<<ListboxSelect>>', self.__patientSelect)
 
         ##Add data frame to the center of the screen
-        self.dataFrame.pack(side='left', fill='both', expand=True)
+        self.dataFrame.pack(side='top', fill='both', expand=True)
 
         ##Assign buttons and text box to locations in the data frame
         self.removeAttrBtn.pack(side='bottom', fill='x')
@@ -675,6 +681,10 @@ class MainScreen:
         self.addAttrBtn.config(command=self.__addAttrBtn)
         self.editAttrBtn.config(command=self.__editAttrBtn)
         self.removeAttrBtn.config(command=self.__removeAttrBtn)
+
+        ##Configure Go Button
+        self.goButton.config(command=self.assignNursesToPatients)
+        self.goButton.pack(side='bottom', fill='both', expand=True)
     
         
 m=MainScreen("NICUAssigner")
